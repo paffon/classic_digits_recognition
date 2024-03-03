@@ -17,7 +17,7 @@ def main():
     nn = "nn"
     knn = "knn"
     chosen_model_name = ui.ask_user(
-        prompt=f"Awesome! Let's {train_or_load.lower()}. Which model type do"
+        prompt=f"Awesome! Which model type do"
                f" you want to {train_or_load.lower()}?",
         options=[nn, knn]
     )
@@ -41,6 +41,10 @@ def main():
     else:
         raise ValueError(f"Invalid action {train_or_load}")
 
+    predictions = instance.get_predictions_for_folder()
+    print([f'{k}, {len(v)}' for k, v in predictions.items()])
+
+
     predict_or_report = ui.ask_user(
         prompt="Do you want to try the model or produce a report?",
         options=["Predict", "Report"]
@@ -48,18 +52,13 @@ def main():
 
     if predict_or_report == "Predict":
         predictions = instance.get_predictions_for_folder()
+        print([f'{k}, {len(v)}' for k, v in predictions.items()])
     elif predict_or_report == "Report":
         instance.report()
     else:
         raise ValueError(f"Invalid action {predict_or_report}")
 
-
-
-
-
-
-
-
+    pass
 
 
 if __name__ == "__main__":

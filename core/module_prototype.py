@@ -20,22 +20,19 @@ def fetch_mnist_data():
 
 
 def load_and_preprocess_image(image_path, input_shape):
+    # Open the image
     image = Image.open(image_path)
-    # Resize the image to match the input shape of your models
 
-    # Convert the PIL image to a numpy array
-    image_array = np.array(image)
+    # Resize the image
+    resized_image = image.resize(input_shape[:2])
 
-    # Flatten the image array
-    image_flattened = image_array.flatten()
+    # Convert the image to grayscale
+    grayscale_image = resized_image.convert('L')
 
-    # Ensure the shape is (784,)
-    image_flattened = image_flattened.reshape(-1)
+    # Get pixel data from the grayscale image
+    pixel_data = list(grayscale_image.getdata())
 
-    # Ensure the length is 784
-    image_flattened = image_flattened[:784]
-
-    return image_flattened
+    return pixel_data
 
 
 # def load_and_preprocess_image(image_path, input_shape):
@@ -65,19 +62,21 @@ class MachineLearning:
         self.model = joblib.load(f'models/{self.name}_model.joblib')
 
     def get_predictions_for_folder(self):
-        folder = 'data/my_data'
-        predictions = []
+        folder = 'data/mnist_samples'
+        predictions = {'correct': [], 'incorrect': []}
         image_files = os.listdir(folder)
         for image_file in image_files:
             actual = int(image_file.split('_')[0])
             image_path = os.path.join(folder, image_file)
             image = load_and_preprocess_image(image_path, self.input_shape)
             prediction = self.model.predict(np.expand_dims(image, axis=0))
-            predictions.append(
-                {'file': image_file,
-                 'actual': actual,
-                 'predictions': prediction,
-                 'predicted': np.argmax(prediction)})
+
+            element = {'file': image_file, 'actual': actual, 'predicted': np.argmax(prediction)}
+
+            if actual == np.argmax(prediction):
+                predictions['correct'].append(element)
+            else:
+                predictions['incorrect'].append(element)
         return predictions
 
     def __str__(self):

@@ -6,6 +6,7 @@ from tensorflow.keras.layers import Dense, Dropout
 from core.module_prototype import MachineLearning, fetch_mnist_data
 
 import ui.ui as ui
+import core.utils as my_utils
 
 
 def _build_layers(params, input_shape):
@@ -76,13 +77,7 @@ class NN(MachineLearning):
         )
 
         # Train the model
-        pieces = 10
-        for i in range(1, pieces + 1):  # Simulate training progress from 1% to 100%
-            print(ui.progress_bar(i, pieces))
-            model.fit(X_train[:len(X_train) * i // pieces],
-                      y_train[:len(y_train) * i // pieces],
-                      epochs=1,
-                      batch_size=32)  # Incremental training
+        model.fit(X_train, y_train, epochs=1, batch_size=32)
 
         # Evaluate the model
         accuracy = model.evaluate(X_test, y_test, verbose=0)[1]
@@ -90,3 +85,4 @@ class NN(MachineLearning):
         # Save the trained model and evaluation results in instance attributes
         self.model = model
         self.accuracy = accuracy
+        print(f"Accuracy: {accuracy}")

@@ -1,20 +1,26 @@
 {
   "input_layer": {
-    "size": 64,
+    "size": 784,
     "activation": "relu",
-    "dropout": 0.1
+    "dropout": 0.0
   },
   "hidden_layers": [
     {
-      "size": 256,
+      "size": 512,
       "activation": "relu",
-      "dropout": 0.1,
+      "dropout": 0.0,
       "kernel_initializer": "he_normal"
     },
     {
       "size": 128,
       "activation": "relu",
-      "dropout": 0.1,
+      "dropout": 0.0,
+      "kernel_initializer": "he_normal"
+    },
+    {
+      "size": 128,
+      "activation": "relu",
+      "dropout": 0.0,
       "kernel_initializer": "he_normal"
     }
   ],
