@@ -42,23 +42,13 @@ def main():
         raise ValueError(f"Invalid action {train_or_load}")
 
     predictions = instance.get_predictions_for_folder()
-    print([f'{k}, {len(v)}' for k, v in predictions.items()])
+    print('Incorrect:')
+    for incorrect_prediction in predictions['incorrect']:
+        print(f'\t{incorrect_prediction}')
 
-
-    predict_or_report = ui.ask_user(
-        prompt="Do you want to try the model or produce a report?",
-        options=["Predict", "Report"]
-    )
-
-    if predict_or_report == "Predict":
-        predictions = instance.get_predictions_for_folder()
-        print([f'{k}, {len(v)}' for k, v in predictions.items()])
-    elif predict_or_report == "Report":
-        instance.report()
-    else:
-        raise ValueError(f"Invalid action {predict_or_report}")
-
-    pass
+    predictions_accuracy = len(predictions['correct']) / (len(predictions['correct']) + len(predictions['incorrect']))
+    print(f'Test accuracy is:  {round(predictions_accuracy, 4)}\n'
+          f'Model accuracy is: {round(instance.accuracy, 4)}')
 
 
 if __name__ == "__main__":

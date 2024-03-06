@@ -1,27 +1,32 @@
 import numpy as np
+import pandas as pd
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Dense, Dropout
+from tensorflow.keras.layers import Dropout, Conv2D, MaxPooling2D, Flatten, Dense
 
 from core.module_prototype import MachineLearning, fetch_mnist_data
-
-import ui.ui as ui
-import core.utils as my_utils
 
 
 def _build_layers(params, input_shape):
     model = Sequential()
 
-    # Add the input layer
-    model.add(
-        Dense(
-            params['input_layer']['size'],
-            activation=params['input_layer']['activation'],
-            input_shape=input_shape
+    model = add_conv_layers(model, params, input_shape)
+
+    # Flatten the output of convolutional layers before dense layers
+    if 'conv_layers' in params:
+        model.add(Flatten())
+
+    # Add the input layer (only if no convolutional layers)
+    if 'conv_layers' not in params:
+        model.add(
+            Dense(
+                params['input_layer']['size'],
+                activation=params['input_layer']['activation'],
+                input_shape=input_shape
+            )
         )
-    )
-    if 'dropout' in params['input_layer']:
-        model.add(Dropout(params['input_layer']['dropout']))
+        if 'dropout' in params['input_layer']:
+            model.add(Dropout(params['input_layer']['dropout']))
 
     # Add hidden layers
     for layer_params in params['hidden_layers']:
@@ -46,6 +51,35 @@ def _build_layers(params, input_shape):
     return model
 
 
+def add_conv_layers(model, params, input_shape):
+    # Add convolutional layers if specified
+    if 'conv_layers' in params:
+        for conv_params in params['conv_layers']:
+            conv2D = Conv2D(
+                conv_params['filters'],
+                conv_params['kernel_size'],
+                activation=conv_params['activation'],
+                padding=conv_params['padding'],
+                input_shape=input_shape,
+                strides=conv_params.get('strides', (1, 1))
+            )
+            model.add(conv2D)
+            model.add(MaxPooling2D((2, 2)))  # Add pooling for dimensionality reduction
+    return model
+
+
+def preprocess_input(X):
+    """
+    Preprocesses the input data by reshaping it to 28x28 image format and normalizing pixel values.
+
+    :param X: Input data.
+    :return: Preprocessed input data.
+    """
+    X = X.values if isinstance(X, pd.DataFrame) else X  # Convert DataFrame to NumPy array if needed
+    X = X.reshape(-1, 28, 28, 1) / 255.0  # Reshape and normalize
+    return X
+
+
 class NN(MachineLearning):
     def __init__(self):
         super().__init__(name="Neural Network", input_shape=(28, 28, 1))
@@ -64,20 +98,21 @@ class NN(MachineLearning):
         y_train = y_train.astype('int')
         y_test = y_test.astype('int')
 
-        input_shape = (X_train.shape[1],)
+        # Reshape the input data to 28x28 image format and normalize
+        X_train = preprocess_input(X_train)
+        X_test = preprocess_input(X_test)
 
         # Build the neural network model
+        input_shape = (28, 28, 1)
         model = _build_layers(params, input_shape)
 
         # Compile the model
-        model.compile(
-            optimizer='adam',
-            loss='sparse_categorical_crossentropy',
-            metrics=['accuracy']
-        )
+        model.compile(optimizer='adam',
+                      loss='sparse_categorical_crossentropy',
+                      metrics=['accuracy'])
 
         # Train the model
-        model.fit(X_train, y_train, epochs=1, batch_size=32)
+        model.fit(X_train, y_train, epochs=20, batch_size=32)
 
         # Evaluate the model
         accuracy = model.evaluate(X_test, y_test, verbose=0)[1]

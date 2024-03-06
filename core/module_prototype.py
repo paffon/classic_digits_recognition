@@ -32,7 +32,7 @@ def load_and_preprocess_image(image_path, input_shape):
     # Get pixel data from the grayscale image
     pixel_data = list(grayscale_image.getdata())
 
-    return pixel_data
+    return grayscale_image
 
 
 # def load_and_preprocess_image(image_path, input_shape):
@@ -47,6 +47,12 @@ class MachineLearning:
         self.model = None
         self.accuracy = None
         self.input_shape = input_shape
+
+        try:
+            with open(f'models/{self.name}_accuracy.txt') as file:
+                self.accuracy = float(file.read())
+        except FileNotFoundError:
+            print('No accuracy found. If you want to have accuracy, train first.')
 
     def save(self):
         ui.announce("Saving Model & Accuracy...")
