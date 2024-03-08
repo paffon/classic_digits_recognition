@@ -16,6 +16,21 @@ def read_json(full_path) -> dict:
         return json.load(f)
 
 
+def print_2d_grayscale_image(image):
+    for row in image:
+        for pixel in row:
+            if pixel < 1:
+                pixel *= 255
+            print(f'{int(pixel):4}', end='')
+        print()
+
+
+def numpy_array_to_dataframe(np_arr):
+    # Create a DataFrame with one row
+    df = pd.DataFrame(np_arr, columns=[f'pixel{i}' for i in range(1, np_arr.shape[1] + 1)])
+    return df
+
+
 def save_as_png(data: pd.Series, filename: str):
     """
     Save a 28x28 image represented by a Pandas Series as a PNG file.

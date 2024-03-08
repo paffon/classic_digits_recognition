@@ -6,10 +6,11 @@ from PIL import Image
 from sklearn.datasets import fetch_openml
 
 import ui.ui as ui
+import core.utils as my_utils
 
 
 def fetch_mnist_data():
-    if os.path.exists('./data/mnist_dataset.joblib'):
+    if os.path.exists(f'./data/mnist_dataset.joblib'):
         ui.announce("Loading MNIST Dataset from disk...")
         mnist = joblib.load('./data/mnist_dataset.joblib')
     else:
@@ -17,28 +18,6 @@ def fetch_mnist_data():
         mnist = fetch_openml(name='mnist_784', version=1)
         joblib.dump(mnist, './data/mnist_dataset.joblib')
     return mnist
-
-
-def load_and_preprocess_image(image_path, input_shape):
-    # Open the image
-    image = Image.open(image_path)
-
-    # Resize the image
-    resized_image = image.resize(input_shape[:2])
-
-    # Convert the image to grayscale
-    grayscale_image = resized_image.convert('L')
-
-    # Get pixel data from the grayscale image
-    pixel_data = list(grayscale_image.getdata())
-
-    return grayscale_image
-
-
-# def load_and_preprocess_image(image_path, input_shape):
-#     image = Image.open(image_path)
-#     # Resize the image to match the input shape of your models
-#     ...
 
 
 class MachineLearning:
@@ -62,28 +41,48 @@ class MachineLearning:
         with open(f'models/{self.name}_accuracy.txt', 'w') as f:
             f.write(str(self.accuracy))
 
+    def train_and_save(self):
+        ui.announce("Training!")
+
+        params = my_utils.read_hyperparameters(self.name)
+        self.train(params)
+        self.save()
+
     def load_model(self):
         ui.announce("Loading Model...")
 
         self.model = joblib.load(f'models/{self.name}_model.joblib')
 
-    def get_predictions_for_folder(self):
-        folder = 'data/mnist_samples'
+    def get_predictions_for_folder(self, chosen_test_set):
+        folder = f'data/{chosen_test_set}'
         predictions = {'correct': [], 'incorrect': []}
         image_files = os.listdir(folder)
         for image_file in image_files:
             actual = int(image_file.split('_')[0])
-            image_path = os.path.join(folder, image_file)
-            image = load_and_preprocess_image(image_path, self.input_shape)
-            prediction = self.model.predict(np.expand_dims(image, axis=0))
 
-            element = {'file': image_file, 'actual': actual, 'predicted': np.argmax(prediction)}
+            # Open the image
+            image = Image.open(os.path.join(folder, image_file))
 
-            if actual == np.argmax(prediction):
+            prediction, correct_prediction = self.predict(image, actual)
+
+            element = {'file': image_file,
+                       'actual': actual,
+                       'predicted': np.argmax(prediction)}
+
+            if correct_prediction:
                 predictions['correct'].append(element)
             else:
                 predictions['incorrect'].append(element)
+
         return predictions
 
     def __str__(self):
         return "MachineLearning(name=%s)" % self.name
+
+    def train(self, params):
+        raise NotImplementedError("train() should be implemented by the"
+                                  "specific machine learning class")
+
+    def predict(self, image, actual):
+        raise NotImplementedError("predict() should be implemented by the"
+                                  "specific machine learning class")

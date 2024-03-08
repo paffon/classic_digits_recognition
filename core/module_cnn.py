@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from PIL import Image
 from sklearn.model_selection import train_test_split
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dropout, Conv2D, MaxPooling2D, Flatten, Dense
@@ -80,9 +81,12 @@ def preprocess_input(X):
     return X
 
 
+class_name = "Convolutional Neural Network"
+
+
 class NN(MachineLearning):
     def __init__(self):
-        super().__init__(name="Neural Network", input_shape=(28, 28, 1))
+        super().__init__(name=class_name, input_shape=(28, 28, 1))
 
     def train(self, params):
         mnist = fetch_mnist_data()
@@ -121,3 +125,21 @@ class NN(MachineLearning):
         self.model = model
         self.accuracy = accuracy
         print(f"Accuracy: {accuracy}")
+
+    def predict(self, image, actual):
+
+        # Resize the image
+        resized_image = image.resize(self.input_shape[:2])
+
+        # Convert the image to grayscale
+        grayscale_image = resized_image.convert('L')
+
+        image_as_np_array = np.expand_dims(grayscale_image, axis=0)
+
+        prediction_arr = self.model.predict(image_as_np_array)
+
+        prediction = np.argmax(prediction_arr)
+
+        correct_prediction = prediction == actual
+
+        return prediction, correct_prediction
