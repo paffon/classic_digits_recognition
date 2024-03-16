@@ -2,7 +2,7 @@ import json
 
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 
 
 def read_hyperparameters(model_type: str) -> dict:
@@ -55,3 +55,39 @@ def save_as_png(data: pd.Series, filename: str):
 
     # Close the plot to free up memory
     plt.close()
+
+
+def plot_heatmap_from_dict(data: dict) -> None:
+    """
+    Plot a heatmap showing the frequency of each y value associated with each x value.
+
+    :param data: Dictionary containing counts of y values associated with x values.
+                 Format: data[x][y] = count
+    """
+    # Extracting x and y values
+    x_values = sorted(data.keys())
+    y_values = sorted({y for x in data.values() for y in x.keys()})
+
+    # Creating a matrix to hold the counts
+    matrix = np.zeros((len(x_values), len(y_values)))
+
+    # Filling the matrix with counts
+    for i, x in enumerate(x_values):
+        for j, y in enumerate(y_values):
+            matrix[i, j] = data.get(x, {}).get(y, 0)
+
+    # Plotting the heatmap
+    plt.imshow(matrix, cmap='viridis', interpolation='nearest')
+    plt.colorbar(label='Count')
+    plt.xticks(np.arange(len(y_values)), y_values)
+    plt.yticks(np.arange(len(x_values)), x_values)
+    plt.xlabel('Y values')
+    plt.ylabel('X values')
+    plt.title('Heatmap of Counts')
+
+    # Annotating data values
+    for i in range(len(x_values)):
+        for j in range(len(y_values)):
+            plt.text(j, i, str(int(matrix[i, j])), ha='center', va='center', color='white')
+
+    plt.show()

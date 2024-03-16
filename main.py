@@ -42,23 +42,32 @@ def main():
     else:
         raise ValueError(f"Invalid action {train_or_load}")
 
-    # Ask the user which test set they'd like to use
-    chosen_test_set = ui.ask_user(
-        prompt=f"Which test set do you want to use?",
-        options=['my_samples', 'mnist_samples'])
+    while True:
+        # Ask the user which test set they'd like to use
+        chosen_test_set = ui.ask_user(
+            prompt=f"Which test set do you want to use?",
+            options=['my_samples', 'mnist_samples'])
 
-    # Use the trained model of the chosen machine learning class to make some
-    # predictions on the chosen test set
-    predictions = instance.get_predictions_for_folder(chosen_test_set)
+        # Use the trained model of the chosen machine learning class to make some
+        # predictions on the chosen test set
+        predictions = instance.get_predictions_for_folder(chosen_test_set)
 
-    # Display the results of the predictions
-    print('Incorrect:')
-    for incorrect_prediction in predictions['incorrect']:
-        print(f'\t{incorrect_prediction}')
+        # Display the results of the predictions
+        print('Incorrect:')
+        for incorrect_prediction in predictions['incorrect']:
+            print(f'\t{incorrect_prediction}')
 
-    predictions_accuracy = len(predictions['correct']) / (len(predictions['correct']) + len(predictions['incorrect']))
-    print(f'Test accuracy is:  {round(predictions_accuracy, 4)}\n'
-          f'Model accuracy is: {round(instance.accuracy, 4)}')
+        predictions_accuracy = len(predictions['correct']) / (len(predictions['correct']) + len(predictions['incorrect']))
+        print(f'Test accuracy is:  {round(predictions_accuracy, 4)}\n'
+              f'Model accuracy is: {round(instance.accuracy, 4)}')
+        x_predicted_as_y = {i: {j: 0 for j in range(10)} for i in range(10)}
+        for predictions in predictions.values():
+            for prediction in predictions:
+                x = prediction['actual']
+                y = prediction['predicted']
+                x_predicted_as_y[x][y] += 1
+
+        my_utils.plot_heatmap_from_dict(x_predicted_as_y)
 
 
 if __name__ == "__main__":
