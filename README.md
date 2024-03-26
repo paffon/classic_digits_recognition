@@ -1,4 +1,4 @@
-# classic_digits_recognition
+# Classic Digits Recognition
 Using the MNIST digits dataset to train and test a few ML models
 
 ## User interface:
