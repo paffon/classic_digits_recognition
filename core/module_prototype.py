@@ -10,6 +10,11 @@ import core.utils as my_utils
 
 
 def fetch_mnist_data():
+    """
+    Fetch the MNIST dataset from disk if available, otherwise download it using openml.
+
+    :return: The MNIST dataset.
+    """
     if os.path.exists(f'./data/mnist_dataset.joblib'):
         ui.announce("Loading MNIST Dataset from disk...")
         mnist = joblib.load('./data/mnist_dataset.joblib')
@@ -33,7 +38,12 @@ class MachineLearning:
         except FileNotFoundError:
             print('No accuracy found. If you want to have accuracy, train first.')
 
-    def save(self):
+    def save(self) -> None:
+        """
+        Save the trained model and accuracy.
+
+        :return: None
+        """
         ui.announce("Saving Model & Accuracy...")
 
         # Save the trained model and accuracy using joblib
@@ -41,19 +51,35 @@ class MachineLearning:
         with open(f'models/{self.name}_accuracy.txt', 'w') as f:
             f.write(str(self.accuracy))
 
-    def train_and_save(self):
+    def train_and_save(self) -> None:
+        """
+        Train the model and save it along with its accuracy.
+
+        :return: None
+        """
         ui.announce("Training!")
 
         params = my_utils.read_hyperparameters(self.name)
         self.train(params)
         self.save()
 
-    def load_model(self):
+    def load_model(self) -> None:
+        """
+        Load a pre-trained model.
+
+        :return: None
+        """
         ui.announce("Loading Model...")
 
         self.model = joblib.load(f'models/{self.name}_model.joblib')
 
-    def get_predictions_for_folder(self, chosen_test_set):
+    def get_predictions_for_folder(self, chosen_test_set: str) -> dict:
+        """
+        Get predictions for a folder of images.
+
+        :param chosen_test_set: The name of the test set folder.
+        :return: A dictionary containing predictions categorized as 'correct' or 'incorrect'.
+        """
         folder = f'data/{chosen_test_set}'
         predictions = {'correct': [], 'incorrect': []}
         image_files = os.listdir(folder)
@@ -67,7 +93,7 @@ class MachineLearning:
 
             element = {'file': image_file,
                        'actual': actual,
-                       'predicted': np.argmax(prediction)}
+                       'predicted': prediction}
 
             if correct_prediction:
                 predictions['correct'].append(element)

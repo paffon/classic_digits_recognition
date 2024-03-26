@@ -2,6 +2,7 @@ import json
 
 import numpy as np
 import pandas as pd
+import seaborn as sns
 import matplotlib.pyplot as plt
 
 
@@ -57,7 +58,7 @@ def save_as_png(data: pd.Series, filename: str):
     plt.close()
 
 
-def plot_heatmap_from_dict(data: dict) -> None:
+def plot_heatmap_from_dict0(data: dict) -> None:
     """
     Plot a heatmap showing the frequency of each y value associated with each x value.
 
@@ -91,3 +92,34 @@ def plot_heatmap_from_dict(data: dict) -> None:
             plt.text(j, i, str(int(matrix[i, j])), ha='center', va='center', color='white')
 
     plt.show()
+
+
+def plot_heatmap_from_dict(data: dict) -> None:
+    """
+    Plot a heatmap showing the frequency of each y value associated with each x value.
+
+    :param data: Dictionary containing counts of y values associated with x values.
+                 Format: data[x][y] = count
+    """
+    x_values = list(data.keys())
+    y_values = set()
+    for counts in data.values():
+        y_values.update(counts.keys())
+
+    # Reverse the order of y_values to display bottom-up
+    y_values = list(reversed(sorted(y_values)))
+
+    heatmap_data = [[data[x].get(y, 0) for y in y_values] for x in x_values]
+
+    ax = sns.heatmap(heatmap_data, xticklabels=x_values, yticklabels=y_values, cmap='viridis')
+
+    # Add data labels to each cell
+    for i in range(len(x_values)):
+        for j in range(len(y_values)):
+            ax.text(j + 0.5, i + 0.5, str(heatmap_data[i][j]), ha='center', va='center', color='black')
+
+    plt.xlabel('X Values')
+    plt.ylabel('Y Values')
+    plt.title('Heatmap of Y Values vs X Values')
+    plt.show()
+

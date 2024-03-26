@@ -17,10 +17,20 @@ class_name = "K-Nearest Neighbors"
 
 
 class KNN(MachineLearning):
+    """
+    K Nearest Neighbors (KNN) classifier implementation.
+    """
+
     def __init__(self):
         super().__init__(name=class_name, input_shape=(28, 28))
 
-    def train(self, params):
+    def train(self, params: dict) -> None:
+        """
+        Train the KNN classifier.
+
+        :param params: Parameters for training.
+        :return: None
+        """
         mnist = fetch_mnist_data()  # Fetch the MNIST dataset from OpenML
 
         # Extract the features (X) and labels (y)
@@ -32,11 +42,7 @@ class KNN(MachineLearning):
         # Initialize the KNN classifier with the provided parameters
         knn = KNeighborsClassifier(n_neighbors=params['k_neighbors'], weights=params['weights'])
 
-        # Use this to print a given row
-        # row_index = 0
-        # my_utils.print_2d_grayscale_image(np.array(X_train.iloc[row_index]).reshape(28, 28))
-
-        # Train the KNN classifier
+        # Train the KNN classifier incrementally
         pieces = 10
         for i in range(1, pieces + 1):  # Simulate training progress from 1% to 100%
             print(ui.progress_bar(i, pieces))
@@ -50,7 +56,16 @@ class KNN(MachineLearning):
         self.model = knn
         self.accuracy = accuracy
 
-    def predict(self, image: PIL.Image, actual):
+    def predict(self, image: PIL.Image, actual: int) -> tuple[int, bool]:
+        """
+        Predict the class label for a given image.
+
+        :param image: The image to predict.
+        :param actual: The actual label of the image.
+        :return: A tuple containing the predicted label and a boolean indicating if the prediction was correct.
+        """
+        print('KNN predicting')
+
         # Resize the image
         resized_image = image.resize((28, 28))
 
@@ -60,16 +75,13 @@ class KNN(MachineLearning):
         # Image as 2D array
         image_as_2d = np.array(grayscale_image)
 
-        # View the image printed
-        # my_utils.print_2d_grayscale_image(image_as_2d)
-
         # Flatten the image
         flattened_image = image_as_2d.flatten()
 
         # Reshape to ensure it's a 2D array
         flattened_image = flattened_image.reshape(1, -1)
 
-        # np_array into a dataframe matching the training set features names
+        # Convert to a dataframe matching the training set features names
         as_df = my_utils.numpy_array_to_dataframe(flattened_image)
 
         # Use the trained KNN model for prediction
@@ -80,5 +92,3 @@ class KNN(MachineLearning):
         correct_prediction = prediction == actual
 
         return prediction, correct_prediction
-
-

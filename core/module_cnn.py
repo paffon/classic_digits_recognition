@@ -9,28 +9,86 @@ from core.module_prototype import MachineLearning, fetch_mnist_data
 
 
 def _build_layers(params, input_shape):
+    """
+    Build the layers of a neural network model based on the provided parameters.
+
+    :param params: A dictionary containing parameters for building the model.
+    :param input_shape: The shape of the input data.
+    :return: The constructed neural network model.
+    """
     model = Sequential()
 
-    model = add_conv_layers(model, params, input_shape)
+    model = _add_conv_layers(model, params, input_shape)
 
-    # Flatten the output of convolutional layers before dense layers
     if 'conv_layers' in params:
         model.add(Flatten())
 
-    # Add the input layer (only if no convolutional layers)
     if 'conv_layers' not in params:
-        model.add(
-            Dense(
-                params['input_layer']['size'],
-                activation=params['input_layer']['activation'],
-                input_shape=input_shape
-            )
-        )
-        if 'dropout' in params['input_layer']:
-            model.add(Dropout(params['input_layer']['dropout']))
+        model = _add_input_layer(model, params['input_layer'], input_shape)
 
-    # Add hidden layers
-    for layer_params in params['hidden_layers']:
+    model = _add_hidden_layers(model, params['hidden_layers'])
+
+    model = _add_output_layer(model, params['output_layer'])
+
+    return model
+
+
+def _add_conv_layers(model, params, input_shape):
+    """
+    Add convolutional layers to the model if specified in the parameters.
+
+    :param model: The neural network model.
+    :param params: A dictionary containing parameters for building the model.
+    :param input_shape: The shape of the input data.
+    :return: The modified neural network model.
+    """
+    if 'conv_layers' in params:
+        for layer_params in params['conv_layers']:
+            model.add(
+                Conv2D(
+                    filters=layer_params['filters'],
+                    kernel_size=layer_params['kernel_size'],
+                    activation=layer_params['activation'],
+                    input_shape=input_shape
+                )
+            )
+            if 'pooling' in layer_params:
+                model.add(MaxPooling2D(pool_size=layer_params['pooling']))
+
+    return model
+
+
+def _add_input_layer(model, input_layer_params, input_shape):
+    """
+    Add an input layer to the model.
+
+    :param model: The neural network model.
+    :param input_layer_params: Parameters for the input layer.
+    :param input_shape: The shape of the input data.
+    :return: The modified neural network model.
+    """
+    model.add(
+        Dense(
+            input_layer_params['size'],
+            activation=input_layer_params['activation'],
+            input_shape=input_shape
+        )
+    )
+    if 'dropout' in input_layer_params:
+        model.add(Dropout(input_layer_params['dropout']))
+
+    return model
+
+
+def _add_hidden_layers(model, hidden_layers_params):
+    """
+    Add hidden layers to the model.
+
+    :param model: The neural network model.
+    :param hidden_layers_params: Parameters for the hidden layers.
+    :return: The modified neural network model.
+    """
+    for layer_params in hidden_layers_params:
         model.add(
             Dense(
                 layer_params['size'],
@@ -41,11 +99,21 @@ def _build_layers(params, input_shape):
         if 'dropout' in layer_params:
             model.add(Dropout(layer_params['dropout']))
 
-    # Add the output layer
+    return model
+
+
+def _add_output_layer(model, output_layer_params):
+    """
+    Add an output layer to the model.
+
+    :param model: The neural network model.
+    :param output_layer_params: Parameters for the output layer.
+    :return: The modified neural network model.
+    """
     model.add(
         Dense(
-            params['output_layer']['size'],
-            activation=params['output_layer']['activation']
+            output_layer_params['size'],
+            activation=output_layer_params['activation']
         )
     )
 
@@ -85,10 +153,20 @@ class_name = "Convolutional Neural Network"
 
 
 class NN(MachineLearning):
+    """
+    Neural Network (NN) classifier implementation.
+    """
+
     def __init__(self):
         super().__init__(name=class_name, input_shape=(28, 28, 1))
 
-    def train(self, params):
+    def train(self, params: dict) -> None:
+        """
+        Train the NN classifier.
+
+        :param params: Parameters for training.
+        :return: None
+        """
         mnist = fetch_mnist_data()
 
         # Extract the features (X) and labels (y)
@@ -107,8 +185,7 @@ class NN(MachineLearning):
         X_test = preprocess_input(X_test)
 
         # Build the neural network model
-        input_shape = (28, 28, 1)
-        model = _build_layers(params, input_shape)
+        model = _build_layers(params, self.input_shape)
 
         # Compile the model
         model.compile(optimizer='adam',
@@ -116,7 +193,7 @@ class NN(MachineLearning):
                       metrics=['accuracy'])
 
         # Train the model
-        model.fit(X_train, y_train, epochs=20, batch_size=32)
+        model.fit(X_train, y_train, epochs=2, batch_size=32)
 
         # Evaluate the model
         accuracy = model.evaluate(X_test, y_test, verbose=0)[1]
@@ -126,8 +203,15 @@ class NN(MachineLearning):
         self.accuracy = accuracy
         print(f"Accuracy: {accuracy}")
 
-    def predict(self, image, actual):
+    def predict(self, image: Image, actual: int) -> tuple[int, bool]:
+        """
+        Predict the class label for a given image.
 
+        :param image: The image to predict.
+        :param actual: The actual label of the image.
+        :return: A tuple containing the predicted label and a boolean indicating if the prediction was correct.
+        """
+        print('CNN predicting')
         # Resize the image
         resized_image = image.resize(self.input_shape[:2])
 
