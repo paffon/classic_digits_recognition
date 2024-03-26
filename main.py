@@ -54,10 +54,13 @@ def predict(instance) -> None:
     # Use the trained model of the chosen machine learning class to make predictions on the chosen test set
     predictions = instance.get_predictions_for_folder(chosen_test_set)
 
+    total_predictions = len(predictions['correct']) + len(predictions['incorrect'])
+    total_incorrect = len(predictions['incorrect'])
+
     # Display the results of the predictions
-    print('Incorrect:')
-    for incorrect_prediction in predictions['incorrect']:
-        print(f'\t{incorrect_prediction}')
+    print(f'{total_incorrect}/{total_predictions} incorrect:')
+    for i, incorrect_prediction in enumerate(predictions['incorrect']):
+        print(f'\t{i}. {incorrect_prediction}')
 
     # Calculate and display accuracy
     predictions_accuracy = len(predictions['correct']) / (
