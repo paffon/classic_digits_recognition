@@ -211,7 +211,7 @@ class NN(MachineLearning):
         :param actual: The actual label of the image.
         :return: A tuple containing the predicted label and a boolean indicating if the prediction was correct.
         """
-        print('CNN predicting')
+
         # Resize the image
         resized_image = image.resize(self.input_shape[:2])
 

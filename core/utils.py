@@ -118,8 +118,8 @@ def plot_heatmap_from_dict(data: dict) -> None:
         for j in range(len(y_values)):
             ax.text(j + 0.5, i + 0.5, str(heatmap_data[i][j]), ha='center', va='center', color='black')
 
-    plt.xlabel('X Values')
-    plt.ylabel('Y Values')
-    plt.title('Heatmap of Y Values vs X Values')
+    plt.xlabel('Actual')
+    plt.ylabel('Predicted')
+    plt.title('Amount of times that value x was classified as y')
     plt.show()
 

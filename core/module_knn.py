@@ -64,7 +64,6 @@ class KNN(MachineLearning):
         :param actual: The actual label of the image.
         :return: A tuple containing the predicted label and a boolean indicating if the prediction was correct.
         """
-        print('KNN predicting')
 
         # Resize the image
         resized_image = image.resize((28, 28))
