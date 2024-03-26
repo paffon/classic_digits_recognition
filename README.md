@@ -1,7 +1,7 @@
 # Classic Digits Recognition
 Using the MNIST digits dataset to train and test a few ML models
 
-The goal is to classigy an image object into the digit drawn in it:
+The goal is to classify an image object into the digit drawn in it:
 ![image](https://github.com/paffon/classic_digits_recognition/assets/45170837/7639ad6c-bd6b-4f73-8946-a16b94018170)
 
 
